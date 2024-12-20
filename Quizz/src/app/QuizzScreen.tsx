@@ -1,11 +1,14 @@
-import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import QuestionCard from "../components/QuestionCard";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { FontAwesome6 } from "@expo/vector-icons";
-import questions from "../../assets/questions";
+
 import CustomButton from "../components/CustomButton";
+import Card from "../components/Card";
+import { useQuizContext } from "../providers/QuizProvider";
+
 export default function QuizzScreen() {
-  const question = questions[0];
+  const { question, onNext, score, totalQuestions, restart } = useQuizContext();
   return (
     <SafeAreaProvider>
       <SafeAreaView>
@@ -13,18 +16,39 @@ export default function QuizzScreen() {
           {/* Header */}
           <Text style={styles.header}>Quiz</Text>
           {/* Body */}
-          <View>
-            <QuestionCard question={question} />
-            <Text style={styles.time}>20 sec</Text>
-          </View>
-          {/* Footer */}
-          <CustomButton
-            onPress={() => Alert.alert("Previous")}
-            title="Next"
-            rightIcon={
-              <FontAwesome6 name="arrow-right" size={16} color="white" />
-            }
-          />
+
+          {question ? (
+            <View>
+              <QuestionCard />
+              <Text style={styles.time}>20 sec</Text>
+            </View>
+          ) : (
+            <Card title="Well Done ">
+              <Text>
+                Correct answers : {score} / {totalQuestions}
+              </Text>
+              <Text>Best score is : </Text>
+            </Card>
+          )}
+          {question ? (
+            <CustomButton
+              onPress={onNext}
+              title="Next"
+              // disabled={!question}
+              rightIcon={
+                <FontAwesome6 name="arrow-right" size={16} color="white" />
+              }
+            />
+          ) : (
+            <CustomButton
+              onPress={restart}
+              title="Replay"
+              // disabled={!question}
+              // rightIcon={
+              //   <FontAwesome6 name="arrow-right" size={16} color="white" />
+              // }
+            />
+          )}
         </View>
       </SafeAreaView>
     </SafeAreaProvider>
