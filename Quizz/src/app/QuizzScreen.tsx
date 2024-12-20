@@ -3,6 +3,7 @@ import QuestionCard from "../components/QuestionCard";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { FontAwesome6 } from "@expo/vector-icons";
 import questions from "../../assets/questions";
+import CustomButton from "../components/CustomButton";
 export default function QuizzScreen() {
   const question = questions[0];
   return (
@@ -17,20 +18,13 @@ export default function QuizzScreen() {
             <Text style={styles.time}>20 sec</Text>
           </View>
           {/* Footer */}
-          <Pressable
-            onPress={() => {
-              Alert.alert("ya maalem");
-            }}
-            style={styles.button}
-          >
-            <Text style={styles.buttonText}>Next</Text>
-            <FontAwesome6
-              name="arrow-right-long"
-              size={16}
-              color="white"
-              style={styles.buttonIcon}
-            />
-          </Pressable>
+          <CustomButton
+            onPress={() => Alert.alert("Previous")}
+            title="Next"
+            rightIcon={
+              <FontAwesome6 name="arrow-right" size={16} color="white" />
+            }
+          />
         </View>
       </SafeAreaView>
     </SafeAreaProvider>
@@ -52,21 +46,5 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#008080",
     marginTop: 10,
-  },
-  button: {
-    backgroundColor: "#008080",
-    padding: 20,
-    borderRadius: 30,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  buttonText: {
-    color: "white",
-    fontSize: 16,
-    letterSpacing: 1.5,
-  },
-  buttonIcon: {
-    position: "absolute",
-    right: 20,
   },
 });
