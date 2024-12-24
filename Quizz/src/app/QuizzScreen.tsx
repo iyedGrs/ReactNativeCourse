@@ -2,12 +2,12 @@ import { Alert, StyleSheet, Text, View } from "react-native";
 import QuestionCard from "../components/QuestionCard";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { FontAwesome6 } from "@expo/vector-icons";
-
 import CustomButton from "../components/CustomButton";
 import Card from "../components/Card";
 import { useQuizContext } from "../providers/QuizProvider";
-import questions from "../../assets/questions";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import useTimer from "../hooks/useTimer";
+import TimerDisplay from "../components/TimerDisplay";
 
 export default function QuizzScreen() {
   const {
@@ -19,21 +19,26 @@ export default function QuizzScreen() {
     isFinished,
     bestScore,
   } = useQuizContext();
-  const [time, setTime] = useState<number>(20);
+  const { clearTimer, startTimer, time } = useTimer(20);
+
   useEffect(() => {
-    setTime(20);
-    const interval = setInterval(() => {
-      setTime((prev) => prev - 1);
-    }, 1000);
-    return () => clearInterval(interval);
+    startTimer();
+    return () => {
+      clearTimer();
+    };
   }, [question]);
 
   useEffect(() => {
+    if (isFinished) {
+      clearTimer();
+      return;
+    }
     if (time <= 0) {
       onNext();
+      clearTimer();
     }
-  }, [time]);
-
+  }, [time, isFinished]);
+  console.log("this is the timerr :  ", time);
   return (
     <SafeAreaProvider>
       <SafeAreaView>
@@ -45,7 +50,7 @@ export default function QuizzScreen() {
           {!isFinished ? (
             <View>
               <QuestionCard />
-              <Text style={styles.time}>{time} sec</Text>
+              <TimerDisplay time={time} />
             </View>
           ) : (
             <Card title="Well Done ">

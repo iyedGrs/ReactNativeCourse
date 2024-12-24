@@ -39,16 +39,20 @@ function QuizProvider({ children }: PropsWithChildren) {
   const [score, setScore] = useState(0);
   const [bestScore, setBestScore] = useState(0);
   const isFinished = questionIndex >= questions.length;
+
   const onNext = () => {
     // if (!selectedOption ) {
     //   alert("Please select an option");
     //   return;
     // }
-
+    // if (!selectedOption) {
+    //   return;
+    // }
     if (selectedOption === question?.correctAnswer) {
       setScore((prev) => prev + 1);
     }
     setQuestionIndex((prev) => prev + 1);
+    setSelectedOption(undefined);
   };
   function Restart() {
     setQuestionIndex(0);
