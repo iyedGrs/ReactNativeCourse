@@ -38,7 +38,6 @@ export default function QuizzScreen() {
       clearTimer();
     }
   }, [time, isFinished]);
-  console.log("this is the timerr :  ", time);
   return (
     <SafeAreaProvider>
       <SafeAreaView>
