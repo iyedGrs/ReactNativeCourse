@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from "react-native";
+import { Alert, StyleSheet, Text, View } from "react-native";
 import QuestionCard from "../components/QuestionCard";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { FontAwesome6 } from "@expo/vector-icons";
@@ -6,9 +6,34 @@ import { FontAwesome6 } from "@expo/vector-icons";
 import CustomButton from "../components/CustomButton";
 import Card from "../components/Card";
 import { useQuizContext } from "../providers/QuizProvider";
+import questions from "../../assets/questions";
+import { useEffect, useState } from "react";
 
 export default function QuizzScreen() {
-  const { question, onNext, score, totalQuestions, restart } = useQuizContext();
+  const {
+    question,
+    onNext,
+    score,
+    totalQuestions,
+    restart,
+    isFinished,
+    bestScore,
+  } = useQuizContext();
+  const [time, setTime] = useState<number>(20);
+  useEffect(() => {
+    setTime(20);
+    const interval = setInterval(() => {
+      setTime((prev) => prev - 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [question]);
+
+  useEffect(() => {
+    if (time <= 0) {
+      onNext();
+    }
+  }, [time]);
+
   return (
     <SafeAreaProvider>
       <SafeAreaView>
@@ -17,17 +42,17 @@ export default function QuizzScreen() {
           <Text style={styles.header}>Quiz</Text>
           {/* Body */}
 
-          {question ? (
+          {!isFinished ? (
             <View>
               <QuestionCard />
-              <Text style={styles.time}>20 sec</Text>
+              <Text style={styles.time}>{time} sec</Text>
             </View>
           ) : (
             <Card title="Well Done ">
               <Text>
                 Correct answers : {score} / {totalQuestions}
               </Text>
-              <Text>Best score is : </Text>
+              <Text>Best score is : {bestScore} </Text>
             </Card>
           )}
           {question ? (
