@@ -8,7 +8,7 @@ import { useQuizContext } from "../providers/QuizProvider";
 import { useEffect } from "react";
 import useTimer from "../hooks/useTimer";
 import TimerDisplay from "../components/TimerDisplay";
-
+import LottieView from "lottie-react-native";
 export default function QuizzScreen() {
   const {
     question,
@@ -52,12 +52,19 @@ export default function QuizzScreen() {
               <TimerDisplay time={time} />
             </View>
           ) : (
-            <Card title="Well Done ">
-              <Text>
-                Correct answers : {score} / {totalQuestions}
-              </Text>
-              <Text>Best score is : {bestScore} </Text>
-            </Card>
+            <>
+              <Card title="Well Done ">
+                <Text>
+                  Correct answers : {score} / {totalQuestions}
+                </Text>
+                <Text>Best score is : {bestScore} </Text>
+              </Card>
+              <LottieView
+                source={require("../../assets/celebrateAnimation.json")}
+                style={StyleSheet.absoluteFill}
+                autoPlay
+              />
+            </>
           )}
           {question ? (
             <CustomButton
