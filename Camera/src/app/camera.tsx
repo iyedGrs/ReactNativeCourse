@@ -1,14 +1,9 @@
-import {
-  View,
-  Text,
-  Button,
-  StyleSheet,
-  Pressable,
-  StatusBar,
-} from "react-native";
+import React from "react";
+import { Pressable, StatusBar, Text, View, StyleSheet } from "react-native";
 import { Link } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
-export default function HomeScreen() {
+
+function CameraScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Welcome to Camera!</Text>
@@ -41,3 +36,5 @@ const styles = StyleSheet.create({
     borderRadius: 50,
   },
 });
+
+export default CameraScreen;
