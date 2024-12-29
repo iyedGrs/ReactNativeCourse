@@ -1,12 +1,18 @@
 import React, { useEffect, useState, useRef } from "react";
-import { View, StyleSheet, ActivityIndicator, Image } from "react-native";
+import {
+  View,
+  StyleSheet,
+  ActivityIndicator,
+  Image,
+  Button,
+} from "react-native";
 import {
   CameraCapturedPicture,
   CameraType,
   CameraView,
   useCameraPermissions,
 } from "expo-camera";
-import { router, Stack } from "expo-router";
+import { router } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import {
   GestureHandlerRootView,
@@ -15,6 +21,8 @@ import {
   GestureHandlerStateChangeEvent,
   Pressable,
 } from "react-native-gesture-handler";
+import path from "path";
+import * as FileSystem from "expo-file-system";
 function CameraScreen() {
   const [facing, setFacing] = useState<CameraType>("front");
   const [permission, requestPermission] = useCameraPermissions();
@@ -40,17 +48,31 @@ function CameraScreen() {
     const res = await camera.current?.takePictureAsync();
     setPicture(res);
   };
+  const saveFile = async (uri: string) => {
+    const fileName = path.parse(uri).base;
+    console.log("esm el file is ", fileName);
+    await FileSystem.copyAsync({
+      from: uri,
+      to: FileSystem.documentDirectory + fileName,
+    });
+    setPicture(undefined);
+    router.back();
+  };
+
   if (picture) {
     return (
-      <View>
+      <View style={{ flex: 1 }}>
         <Image
           source={{ uri: picture.uri }}
           style={{
             width: "100%",
-            height: "100%",
+            flex: 1,
             // transform: [{ scaleX: facing === "front" ? -1 : 1 }],
           }}
         />
+        <View>
+          <Button title="Save" onPress={() => saveFile(picture.uri)} />
+        </View>
         <MaterialIcons
           name="close"
           color={"white"}
