@@ -1,13 +1,21 @@
 import React from "react";
-import { Text, View } from "react-native";
-import { useLocalSearchParams } from "expo-router";
+import { StyleSheet, Text, View } from "react-native";
+import { useLocalSearchParams, Stack } from "expo-router";
 function Image() {
   const { id } = useLocalSearchParams();
   return (
     <View>
-      <Text>Image! {id}</Text>
+      <Stack.Screen options={{ title: id.toString() }} />
+      <Text style={styles.title}>{id}</Text>
     </View>
   );
 }
+const styles = StyleSheet.create({
+  title: {
+    fontSize: 20,
+    fontWeight: "bold",
+    padding: 20,
+  },
+});
 
 export default Image;

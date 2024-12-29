@@ -8,14 +8,23 @@ import {
 } from "react-native";
 import { Link } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
+import React from "react";
 export default function HomeScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Welcome to Camera!</Text>
-
+      <Link href="/image/image-1">
+        <Text>Image 1 </Text>
+      </Link>
+      <Link href="/image/image-2">
+        <Text>Image 2 </Text>
+      </Link>
+      <Link href="/image/image-3">
+        <Text>Image 3 </Text>
+      </Link>
       <Link href="/camera" asChild>
         <Pressable style={styles.floatingBtn}>
-          <MaterialIcons name="linked-camera" size={34} color="black" />
+          <MaterialIcons name="linked-camera" size={34} color="white" />
         </Pressable>
       </Link>
       <StatusBar barStyle={"light-content"} />
