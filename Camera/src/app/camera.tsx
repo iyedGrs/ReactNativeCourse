@@ -5,12 +5,15 @@ import {
   ActivityIndicator,
   Image,
   Button,
+  PermissionsAndroid,
 } from "react-native";
 import {
   CameraCapturedPicture,
   CameraType,
   CameraView,
   useCameraPermissions,
+  Camera,
+  PermissionResponse,
 } from "expo-camera";
 import { router } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -26,13 +29,34 @@ import * as FileSystem from "expo-file-system";
 function CameraScreen() {
   const [facing, setFacing] = useState<CameraType>("front");
   const [permission, requestPermission] = useCameraPermissions();
+  const [micPermission, setMicPermission] = useState<PermissionResponse>();
+  const [isRecording, setIsRecording] = useState(false);
+
   const [picture, setPicture] = useState<CameraCapturedPicture>();
   const camera = useRef<CameraView>(null);
+
+  async function requestRecordAudioPermission() {
+    const granted = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+      {
+        title: "Audio Permission",
+        message: "App needs audio permission to record video",
+        buttonPositive: "OK",
+      }
+    );
+    return granted === PermissionsAndroid.RESULTS.GRANTED;
+  }
   useEffect(() => {
     if (permission && !permission?.granted && permission.canAskAgain) {
       requestPermission();
     }
   }, [permission]);
+  useEffect(() => {
+    (async () => {
+      const audioStatus = await Camera.requestMicrophonePermissionsAsync();
+      setMicPermission(audioStatus);
+    })();
+  }, []);
   if (!permission?.granted) {
     return <ActivityIndicator />;
   }
@@ -48,9 +72,30 @@ function CameraScreen() {
     const res = await camera.current?.takePictureAsync();
     setPicture(res);
   };
+  const takeVideo = async () => {
+    try {
+      if (!camera.current || !micPermission?.granted) {
+        console.log("Camera ref or mic permission missing");
+        return;
+      }
+
+      if (isRecording) {
+        setIsRecording(false);
+        camera.current.stopRecording();
+        return;
+      }
+
+      setIsRecording(true);
+      const res = await camera.current.recordAsync({ maxDuration: 3 });
+      console.log("Video recorded:", res);
+    } catch (err) {
+      console.log("Video recording error:", err);
+    } finally {
+      setIsRecording(false);
+    }
+  };
   const saveFile = async (uri: string) => {
     const fileName = path.parse(uri).base;
-    console.log("esm el file is ", fileName);
     await FileSystem.copyAsync({
       from: uri,
       to: FileSystem.documentDirectory + fileName,
@@ -93,13 +138,18 @@ function CameraScreen() {
               ref={camera}
               style={styles.camera}
               facing={facing}
+              mode="video"
             />
           </View>
         </TapGestureHandler>
 
         <View style={styles.footer}>
           <View />
-          <Pressable style={styles.recordButton} onPress={takePicture} />
+          <Pressable
+            style={[styles.recordButton]}
+            onPress={takePicture}
+            onLongPress={takeVideo}
+          />
           <MaterialIcons
             name="flip-camera-android"
             size={30}
