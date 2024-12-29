@@ -1,52 +1,46 @@
 import React from "react";
-import { Image, Pressable, StyleSheet, Text, View } from "react-native";
-import { useLocalSearchParams, Stack, router } from "expo-router";
+import { Image, View, StyleSheet } from "react-native";
+import { useLocalSearchParams, router, Stack } from "expo-router";
 import * as FileSystem from "expo-file-system";
-import { MaterialIcons } from "@expo/vector-icons";
-function ImageScreen() {
-  const { id } = useLocalSearchParams();
+import CustomHeader from "../../../components/CustomHeader";
+
+const ImageScreen: React.FC = () => {
+  const { id } = useLocalSearchParams<{ id: string }>();
   const fullUri = (FileSystem.documentDirectory || "") + (id || "");
-  console.log("the full uri is ", fullUri);
 
   const onDelete = async () => {
-    console.log("deleteing right now");
-    await FileSystem.deleteAsync(fullUri);
-    router.back();
+    console.log("Deleting right now");
+    try {
+      await FileSystem.deleteAsync(fullUri);
+      router.back();
+    } catch (error) {
+      console.error("Error deleting file:", error);
+    }
+  };
+
+  const onSave = () => {
+    console.log("Save pressed");
   };
 
   return (
-    <View>
-      <Stack.Screen
-        options={{
-          title: "Media",
-          headerRight: () => (
-            <Pressable>
-              <MaterialIcons
-                onPress={onDelete}
-                name="delete"
-                size={24}
-                color="crimson"
-                // style={{ backgroundColor: "green", padding: 5 }}
-              />
-              <MaterialIcons
-                name="save"
-                size={24}
-                color="dimgray"
-                onPress={() => {
-                  console.log("hi");
-                }}
-              />
-            </Pressable>
-          ),
-        }}
-      />
-
+    <View style={{ flex: 1, backgroundColor: "white" }}>
+      <Stack.Screen options={{ headerShown: false }} />
+      <CustomHeader onDelete={onDelete} onSave={onSave} />
       <Image
         source={{ uri: fullUri }}
-        style={{ width: "100%", height: "100%" }}
+        style={styles.image}
+        resizeMode="center"
       />
     </View>
   );
-}
+};
+
+const styles = StyleSheet.create({
+  image: {
+    flex: 1, // Ensures the image takes all available space
+    alignSelf: "center", // Centers the image horizontally
+    width: "100%", // Prevents horizontal clipping
+  },
+});
 
 export default ImageScreen;

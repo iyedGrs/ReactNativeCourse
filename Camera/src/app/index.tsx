@@ -30,7 +30,8 @@ export default function HomeScreen() {
       (file) =>
         file.toLowerCase().endsWith(".jpg") ||
         file.toLowerCase().endsWith(".png") ||
-        file.toLowerCase().endsWith(".jpeg")
+        file.toLowerCase().endsWith(".jpeg") ||
+        file.toLowerCase().endsWith(".mp4")
     );
     setImages(
       imageFiles.map((file) => ({

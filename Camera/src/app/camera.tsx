@@ -21,12 +21,16 @@ import {
   GestureHandlerStateChangeEvent,
   Pressable,
 } from "react-native-gesture-handler";
+import { Video } from "expo-av";
 import path from "path";
 import * as FileSystem from "expo-file-system";
 function CameraScreen() {
   const [facing, setFacing] = useState<CameraType>("front");
   const [permission, requestPermission] = useCameraPermissions();
   const [picture, setPicture] = useState<CameraCapturedPicture>();
+  const [isRecording, setIsRecording] = useState(false);
+  const [video, setVideo] = useState<string>();
+  const modeRef = useRef<"picture" | "video">("picture");
   const camera = useRef<CameraView>(null);
   useEffect(() => {
     if (permission && !permission?.granted && permission.canAskAgain) {
@@ -48,6 +52,26 @@ function CameraScreen() {
     const res = await camera.current?.takePictureAsync();
     setPicture(res);
   };
+  const onPress = () => {
+    if (isRecording) {
+      camera.current?.stopRecording();
+      setIsRecording(false);
+    } else {
+      modeRef.current = "picture";
+      takePicture();
+    }
+  };
+  const handleLongPress = () => {
+    modeRef.current = "video";
+    takeVideo();
+  };
+  const takeVideo = async () => {
+    setIsRecording(true);
+    const res = await camera.current?.recordAsync({ maxDuration: 60 });
+    console.log(res);
+    setVideo(res?.uri);
+    setIsRecording(false);
+  };
   const saveFile = async (uri: string) => {
     const fileName = path.parse(uri).base;
     console.log("esm el file is ", fileName);
@@ -59,19 +83,34 @@ function CameraScreen() {
     router.back();
   };
 
-  if (picture) {
+  if (picture || video) {
     return (
       <View style={{ flex: 1 }}>
-        <Image
-          source={{ uri: picture.uri }}
-          style={{
-            width: "100%",
-            flex: 1,
-            // transform: [{ scaleX: facing === "front" ? -1 : 1 }],
-          }}
-        />
+        {picture && (
+          <Image
+            source={{ uri: picture.uri }}
+            style={{
+              width: "100%",
+              flex: 1,
+              transform: [{ scaleX: facing === "front" ? -1 : 1 }],
+            }}
+          />
+        )}
+        {video && (
+          <Video
+            source={{ uri: video }}
+            style={{
+              width: "100%",
+              flex: 1,
+              // transform: [{ scaleX: facing === "front" ? -1 : 1 }],
+            }}
+            useNativeControls
+            isLooping
+            shouldPlay
+          />
+        )}
         <View>
-          <Button title="Save" onPress={() => saveFile(picture.uri)} />
+          <Button title="Save" onPress={() => saveFile(picture?.uri)} />
         </View>
         <MaterialIcons
           name="close"
@@ -89,17 +128,26 @@ function CameraScreen() {
         <TapGestureHandler onHandlerStateChange={onDoubleTap} numberOfTaps={2}>
           <View>
             <CameraView
-              mirror={facing === "front"}
+              // mirror={facing === "front"}
               ref={camera}
               style={styles.camera}
               facing={facing}
+              mode={modeRef.current}
+              // mode={isRecording ? "video" : "picture"}
             />
           </View>
         </TapGestureHandler>
 
         <View style={styles.footer}>
           <View />
-          <Pressable style={styles.recordButton} onPress={takePicture} />
+          <Pressable
+            style={[
+              styles.recordButton,
+              { backgroundColor: isRecording ? "crimson" : "white" },
+            ]}
+            onPress={onPress}
+            onLongPress={handleLongPress}
+          />
           <MaterialIcons
             name="flip-camera-android"
             size={30}
