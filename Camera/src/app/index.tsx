@@ -12,10 +12,13 @@ import { Link, useFocusEffect } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import React, { useCallback, useEffect, useState } from "react";
 import * as FileSystem from "expo-file-system";
+import { getMediaType, MediaType } from "../utils/MediaTypes";
+import { ResizeMode, Video } from "expo-av";
 
 interface Media {
   name: string;
   uri: string;
+  type: MediaType;
 }
 export default function HomeScreen() {
   const [images, setImages] = useState<Media[]>([]);
@@ -26,17 +29,18 @@ export default function HomeScreen() {
     const res = await FileSystem.readDirectoryAsync(
       FileSystem.documentDirectory
     );
-    const imageFiles = res.filter(
-      (file) =>
-        file.toLowerCase().endsWith(".jpg") ||
-        file.toLowerCase().endsWith(".png") ||
-        file.toLowerCase().endsWith(".jpeg") ||
-        file.toLowerCase().endsWith(".mp4")
-    );
+    // const imageFiles = res.filter(
+    //   (file) =>
+    //     file.toLowerCase().endsWith(".jpg") ||
+    //     file.toLowerCase().endsWith(".png") ||
+    //     file.toLowerCase().endsWith(".jpeg") ||
+    //     file.toLowerCase().endsWith(".mp4")
+    // );
     setImages(
-      imageFiles.map((file) => ({
+      res.map((file) => ({
         name: file,
         uri: FileSystem.documentDirectory + file,
+        type: getMediaType(file),
       }))
     );
   };
@@ -56,10 +60,34 @@ export default function HomeScreen() {
         renderItem={({ item }) => (
           <Link href={`/image/${item.name}`} asChild>
             <Pressable style={{ flex: 1, maxWidth: "33.33%" }}>
-              <Image
-                source={{ uri: item.uri }}
-                style={{ aspectRatio: 3 / 4, borderRadius: 5 }}
-              />
+              {item.type === "image" && (
+                <Image
+                  source={{ uri: item.uri }}
+                  style={{ aspectRatio: 3 / 4, borderRadius: 5 }}
+                />
+              )}
+              {item.type === "video" && (
+                <>
+                  <Video
+                    source={{ uri: item.uri }}
+                    style={{ aspectRatio: 3 / 4, borderRadius: 5 }}
+                    resizeMode={ResizeMode.COVER}
+                    positionMillis={100}
+                    isMuted={true}
+                  />
+                  <MaterialIcons
+                    name="play-circle-outline"
+                    size={50}
+                    color="white"
+                    style={{
+                      position: "absolute",
+                      top: "50%",
+                      left: "50%",
+                      transform: "translate(-50%, -50%)",
+                    }}
+                  />
+                </>
+              )}
             </Pressable>
           </Link>
         )}

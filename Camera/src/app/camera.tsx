@@ -80,6 +80,7 @@ function CameraScreen() {
       to: FileSystem.documentDirectory + fileName,
     });
     setPicture(undefined);
+    setVideo(undefined);
     router.back();
   };
 
@@ -110,7 +111,10 @@ function CameraScreen() {
           />
         )}
         <View>
-          <Button title="Save" onPress={() => saveFile(picture?.uri)} />
+          <Button
+            title="Save"
+            onPress={() => saveFile(picture?.uri || video || "")}
+          />
         </View>
         <MaterialIcons
           name="close"
