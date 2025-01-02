@@ -1,60 +1,43 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
-} from "react-native";
+import { View, StyleSheet, ScrollView } from "react-native";
 import CustomButton from "../../components/CustomButton";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import CustomTextInput from "../../components/CustomInput";
 import { useForm, FormProvider, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-const PersonalInfoSchema = z.object({
-  fullName: z
-    .string()
-    .min(1, "Full name is required")
-    .min(3, "Full name must be at least 3 characters"),
 
-  address: z
-    .string()
-    .min(1, "Address is required")
-    .min(5, "Please enter a valid address"),
+import {
+  PersonalInfoSchema,
+  PersonalInfo,
+  useCheckoutForm,
+} from "../../provider/CheckoutFormProvider";
+import CheckoutFormStepIndicator from "../../components/CheckoutFormStepIndicator";
 
-  city: z.string().min(1, "City is required").min(2, "City name is too short"),
-
-  postCode: z
-    .string()
-    .min(1, "Postcode is required")
-    .min(4, "enter a valid postcode"),
-
-  phoneNumber: z
-    .string()
-    .min(1, "Phone number is required")
-    .min(8, "Please enter a valid phone number"),
-});
-
-type PersonalInfo = z.infer<typeof PersonalInfoSchema>;
 const PersonalDetails = () => {
+  const { setPersonalInfo, personalInfo } = useCheckoutForm();
+  const { mode } = useLocalSearchParams();
   const forms = useForm<PersonalInfo>({
     resolver: zodResolver(PersonalInfoSchema),
-    defaultValues: {
-      fullName: "",
-      address: "",
-      city: "",
-      postCode: "",
-      phoneNumber: "",
-    },
+    defaultValues:
+      mode === "edit"
+        ? personalInfo
+        : {
+            fullName: "",
+            address: "",
+            city: "",
+            postCode: "",
+            phoneNumber: "",
+          },
   });
   const onNext: SubmitHandler<PersonalInfo> = (data) => {
     //the data is valid and we can navigate to the next screen
     // Navigate to the next screen
-    console.log("this is error ", forms.formState.errors);
-    console.log("this is the data ", data);
+
+    setPersonalInfo(data);
+    if (mode === "edit") {
+      router.back();
+      return;
+    }
     router.push("/checkout/payment");
   };
   const checkName = () => {};
