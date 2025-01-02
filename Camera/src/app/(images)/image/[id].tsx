@@ -4,18 +4,19 @@ import { useLocalSearchParams, router, Stack } from "expo-router";
 import * as FileSystem from "expo-file-system";
 import CustomHeader from "../../../components/CustomHeader";
 import { getMediaType } from "../../../utils/MediaTypes";
-import { ResizeMode, Video } from "expo-av";
 import { VideoView, useVideoPlayer } from "expo-video";
+import * as MediaLibrary from "expo-media-library";
 const ImageScreen: React.FC = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
   const fullUri = (FileSystem.documentDirectory || "") + (id || "");
   const type = getMediaType(fullUri);
+  const [perimissionResponse, requestPermission] =
+    MediaLibrary.usePermissions();
   const player = useVideoPlayer(fullUri, (player) => {
     player.loop = true;
     player.play();
   });
   const onDelete = async () => {
-    console.log("Deleting right now");
     try {
       await FileSystem.deleteAsync(fullUri);
       router.back();
@@ -24,8 +25,11 @@ const ImageScreen: React.FC = () => {
     }
   };
 
-  const onSave = () => {
-    console.log("Save pressed");
+  const onSave = async () => {
+    if (perimissionResponse?.status !== "granted") {
+      await requestPermission();
+    }
+    const asset = await MediaLibrary.createAssetAsync(fullUri);
   };
 
   return (
@@ -63,6 +67,7 @@ const styles = StyleSheet.create({
     flex: 1, // Ensures the image takes all available space
     // alignSelf: "center", // Centers the image horizontally
     width: "100%", // Prevents horizontal clipping
+    transform: [{ scaleX: -1 }], // Flips the image horizontally
   },
 });
 

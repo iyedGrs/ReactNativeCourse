@@ -68,13 +68,11 @@ function CameraScreen() {
   const takeVideo = async () => {
     setIsRecording(true);
     const res = await camera.current?.recordAsync({ maxDuration: 60 });
-    console.log(res);
     setVideo(res?.uri);
     setIsRecording(false);
   };
   const saveFile = async (uri: string) => {
     const fileName = path.parse(uri).base;
-    console.log("esm el file is ", fileName);
     await FileSystem.copyAsync({
       from: uri,
       to: FileSystem.documentDirectory + fileName,
