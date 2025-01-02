@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, StyleSheet, ScrollView } from "react-native";
 import CustomButton from "../../components/CustomButton";
 import { router, useLocalSearchParams } from "expo-router";
@@ -11,11 +11,39 @@ import {
   PersonalInfo,
   useCheckoutForm,
 } from "../../provider/CheckoutFormProvider";
-import CheckoutFormStepIndicator from "../../components/CheckoutFormStepIndicator";
-
+import RNPickerSelect from "react-native-picker-select";
+interface Country {
+  label: string;
+  value: string;
+}
 const PersonalDetails = () => {
   const { setPersonalInfo, personalInfo } = useCheckoutForm();
   const { mode } = useLocalSearchParams();
+  const [countries, setCountries] = useState<Country[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  useEffect(() => {
+    const fetchCountries = async () => {
+      try {
+        const response = await fetch(
+          "https://restcountries.com/v3.1/all?fields=name,cca2"
+        );
+        const data = await response.json();
+        const formattedCountries = data
+          .map((country: any) => ({
+            label: country.name.common,
+            value: country.cca2,
+          }))
+          .sort((a: Country, b: Country) => a.label.localeCompare(b.label));
+
+        setCountries(formattedCountries);
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchCountries();
+  }, []);
   const forms = useForm<PersonalInfo>({
     resolver: zodResolver(PersonalInfoSchema),
     defaultValues:
@@ -67,6 +95,17 @@ const PersonalDetails = () => {
             name="postCode"
           />
         </View>
+        <RNPickerSelect
+          onValueChange={(value) => console.log(value)}
+          items={countries}
+          placeholder={{ label: "Select a country", value: null }}
+          disabled={isLoading}
+          style={{
+            placeholder: { color: "#9EA0A4" },
+            inputIOS: { color: "black" },
+            inputAndroid: { color: "black" },
+          }}
+        />
         <CustomTextInput label="Address" placeholder="Address" name="address" />
         <CustomTextInput
           label="Phone Number"
